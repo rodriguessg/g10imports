@@ -1,0 +1,236 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Vitrine iPhones</title>
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
+  <style>
+    body {
+      font-family: Arial, sans-serif;
+      margin: 0;
+      padding: 0;
+      background-color: #f8f8f8;
+      color: #333;
+    }
+    .header {
+      background-color: #000;
+      color: white;
+      padding: 1rem;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+    }
+    .container {
+      padding: 2rem;
+    }
+    .produto-card {
+      background: white;
+      border-radius: 10px;
+      padding: 1rem;
+      box-shadow: 0 2px 6px rgba(0,0,0,0.1);
+      text-align: center;
+      margin-bottom: 1rem;
+    }
+    .produto-card img {
+      width: 100px;
+      height: auto;
+    }
+    #filtros {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 1rem;
+      margin-bottom: 2rem;
+    }
+    #filtros input,
+    #filtros select,
+    #filtros button {
+      padding: 0.5rem;
+      border-radius: 5px;
+      border: 1px solid #ccc;
+    }
+    .whatsapp {
+      position: fixed;
+      bottom: 20px;
+      right: 20px;
+      background-color: #25D366;
+      color: white;
+      font-size: 24px;
+      padding: 15px;
+      border-radius: 50%;
+      z-index: 1000;
+      text-align: center;
+      box-shadow: 0 2px 8px rgba(0,0,0,0.2);
+      transition: transform 0.2s;
+    }
+    .whatsapp:hover {
+      transform: scale(1.1);
+    }
+  </style>
+</head>
+<body>
+  <header class="header">
+    <h1>Vitrine iPhones</h1>
+    <button class="btn" id="ver-favoritos">Ver Favoritos</button>
+  </header>
+
+  <section class="container">
+    <div id="filtros">
+      <input type="text" id="filtroTexto" placeholder="Buscar por nome..." />
+      <select id="filtroSerie">
+        <option value="">Todas as séries</option>
+        <option value="15">iPhone 15</option>
+        <option value="14">iPhone 14</option>
+        <option value="13">iPhone 13</option>
+      </select>
+      <select id="filtroPreco">
+        <option value="">Qualquer preço</option>
+        <option value="5000">Até R$ 5.000</option>
+        <option value="7000">Até R$ 7.000</option>
+        <option value="9000">Até R$ 9.000</option>
+      </select>
+      <button onclick="limparFiltros()">Limpar</button>
+    </div>
+    <div id="produtos-lista"></div>
+  </section>
+
+  <section class="container" id="calculadora">
+    <h2>Calculadora de Economia</h2>
+    <select id="selecaoProduto"></select>
+    <div id="resultadoEconomia"></div>
+  </section>
+
+  <a href="https://wa.me/5500000000000?text=Olá,%20quero%20mais%20informações!" class="whatsapp" target="_blank">
+    <i class="fab fa-whatsapp"></i>
+  </a>
+
+  <script>
+    const products = [
+      {
+        name: "iPhone 15 Pro Max",
+        description: "Modelo topo de linha com câmera de última geração.",
+        importPrice: 8500,
+        brazilPrice: 10999,
+        image: "https://via.placeholder.com/100"
+      },
+      {
+        name: "iPhone 14",
+        description: "Desempenho sólido por um preço mais acessível.",
+        importPrice: 5500,
+        brazilPrice: 7499,
+        image: "https://via.placeholder.com/100"
+      },
+      {
+        name: "iPhone 13 Mini",
+        description: "Compacto e poderoso.",
+        importPrice: 4300,
+        brazilPrice: 5999,
+        image: "https://via.placeholder.com/100"
+      }
+    ];
+
+    const listaProdutos = document.getElementById("produtos-lista");
+
+    function renderizarProdutos(lista = products) {
+      listaProdutos.innerHTML = "";
+      lista.forEach(produto => {
+        const card = document.createElement("div");
+        card.className = "produto-card";
+        card.innerHTML = `
+          <img src="${produto.image}" alt="${produto.name}" />
+          <h3>${produto.name}</h3>
+          <p>${produto.description}</p>
+          <p><strong>Brasil:</strong> R$ ${produto.brazilPrice}</p>
+          <p><strong>Importado:</strong> R$ ${produto.importPrice}</p>
+        `;
+        const btnFav = document.createElement("button");
+        btnFav.textContent = "❤️";
+        btnFav.onclick = () => toggleFavorito(produto);
+        card.appendChild(btnFav);
+        listaProdutos.appendChild(card);
+      });
+    }
+
+    renderizarProdutos();
+
+    function aplicarFiltros() {
+      const texto = document.getElementById("filtroTexto").value.toLowerCase();
+      const serie = document.getElementById("filtroSerie").value;
+      const preco = document.getElementById("filtroPreco").value;
+
+      const filtrados = products.filter(p => {
+        return (
+          (p.name.toLowerCase().includes(texto) || p.description.toLowerCase().includes(texto)) &&
+          (serie === "" || p.name.includes(serie)) &&
+          (preco === "" || p.importPrice <= parseFloat(preco))
+        );
+      });
+
+      renderizarProdutos(filtrados);
+    }
+
+    document.getElementById("filtroTexto").addEventListener("input", aplicarFiltros);
+    document.getElementById("filtroSerie").addEventListener("change", aplicarFiltros);
+    document.getElementById("filtroPreco").addEventListener("change", aplicarFiltros);
+
+    function limparFiltros() {
+      document.getElementById("filtroTexto").value = "";
+      document.getElementById("filtroSerie").value = "";
+      document.getElementById("filtroPreco").value = "";
+      renderizarProdutos();
+    }
+
+    const seletor = document.getElementById("selecaoProduto");
+    const resultado = document.getElementById("resultadoEconomia");
+    products.forEach(p => {
+      const opt = document.createElement("option");
+      opt.value = p.name;
+      opt.textContent = `${p.name} - R$${p.importPrice}`;
+      seletor.appendChild(opt);
+    });
+
+    seletor.addEventListener("change", () => {
+      const produto = products.find(p => p.name === seletor.value);
+      if (produto) {
+        const economia = produto.brazilPrice - produto.importPrice;
+        resultado.innerHTML = `
+          <p><strong>Preço no Brasil:</strong> R$ ${produto.brazilPrice}</p>
+          <p><strong>Importado:</strong> R$ ${produto.importPrice}</p>
+          <p><strong>Economia:</strong> R$ ${economia}</p>
+        `;
+      }
+    });
+
+    let favoritos = JSON.parse(localStorage.getItem("favoritos")) || [];
+
+    function toggleFavorito(produto) {
+      const index = favoritos.findIndex(fav => fav.name === produto.name);
+      if (index === -1) {
+        favoritos.push(produto);
+      } else {
+        favoritos.splice(index, 1);
+      }
+      localStorage.setItem("favoritos", JSON.stringify(favoritos));
+      renderFavoritosContador();
+    }
+
+    function renderFavoritosContador() {
+      let span = document.getElementById("favoritos-contador");
+      if (!span) {
+        span = document.createElement("span");
+        span.id = "favoritos-contador";
+        span.style.marginLeft = "10px";
+        document.getElementById("ver-favoritos").after(span);
+      }
+      span.textContent = `❤️ ${favoritos.length}`;
+    }
+
+    document.getElementById("ver-favoritos").addEventListener("click", () => {
+      const lista = favoritos.map(p => `${p.name} - R$ ${p.importPrice}`).join("\n");
+      alert("Seus favoritos:\n\n" + (lista || "Nenhum produto salvo."));
+    });
+
+    renderFavoritosContador();
+  </script>
+</body>
+</html>
